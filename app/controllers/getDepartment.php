@@ -2,7 +2,7 @@
 
 namespace App\controllers\getDepartment;
 
-use model\Departement;
+use app\models\Departement;
 
 class getDepartment {
 

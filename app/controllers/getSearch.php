@@ -2,8 +2,8 @@
 
 namespace App\controllers\getSearch;
 
-use model\Annonce;
-use model\Categorie;
+use app\models\Annonce;
+use app\models\Categorie;
 
 class Search {
 

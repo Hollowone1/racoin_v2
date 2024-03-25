@@ -2,8 +2,8 @@
 
 namespace App\controllers\addAnnounce;
 
-use model\Annonce;
-use model\Annonceur;
+use app\models\Annonce;
+use app\models\Annonceur;
 
 class addItem
 {

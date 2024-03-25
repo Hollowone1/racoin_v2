@@ -2,7 +2,7 @@
 
 namespace App\controllers\getApiKey;
 
-use model\ApiKey;
+use app\models\ApiKey;
 
 class KeyGenerator {
 

@@ -3,11 +3,11 @@
 namespace App\controllers\createItem;
 
 use AllowDynamicProperties;
-use model\Annonce;
-use model\Annonceur;
-use model\Departement;
-use model\Photo;
-use model\Categorie;
+use app\models\Annonce;
+use app\models\Annonceur;
+use app\models\Departement;
+use app\models\Photo;
+use app\models\Categorie;
 
 #[AllowDynamicProperties] class item {
     public function __construct(){

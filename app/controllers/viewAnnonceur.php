@@ -8,9 +8,9 @@
 
 namespace App\controllers\viewAnnonceur;
 
-use model\Annonce;
-use model\Annonceur;
-use model\Photo;
+use app\models\Annonce;
+use app\models\Annonceur;
+use app\models\Photo;
 
 class viewAnnonceur {
     public function __construct(){

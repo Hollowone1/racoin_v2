@@ -2,9 +2,9 @@
 
 namespace App\controllers\getAllAnounce;
 
-use model\Annonce;
-use model\Photo;
-use model\Annonceur;
+use app\models\Annonce;
+use app\models\Photo;
+use app\models\Annonceur;
 
 class index
 {
