@@ -10,6 +10,10 @@ Organisez le code de manière claire et uniforme.
 ## 3 - Mise à jour des packages
 Passer à Slim 4. Installer également les outils qui vous seront utiles pour la refactorisation.
 
+PHP-CS-Fixer (composer global require friendsofphp/php-cs-fixer)
+/ Phan (composer global require phan/phan
+) / Behat (composer global require behat/behat) /  PHPUnit (composer install --dev)
+
 ## 4 - Amélioration du code
 Passer le code sous les derniers standard PHP 8 (fonction typé,...)
 
