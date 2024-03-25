@@ -5,13 +5,13 @@
         "twig/twig": "3.*",
         "illuminate/database": "11.*",
         "ext-mysqli": "*",
-        "ext-pdo": "*",
+        "ext-pdo": "*"
     },
     "autoload":{
         "psr-7":{
-            "controller":"",
-            "model":"",
-            "db":""
+            "controller":"./app/controllers",
+            "model":"./app/models",
+            "db":"./app/db"
         }
     },
     "config": {
