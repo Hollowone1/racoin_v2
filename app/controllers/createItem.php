@@ -110,108 +110,119 @@ use app\models\Categorie;
             "categItem" => $this->categItem));
     }
 
-    function edit($twig, $menu, $chemin, $allPostVars, $id){
+    function edit($twig, $menu, $chemin, $allPostVars, $id)
+{
+    date_default_timezone_set('Europe/Paris');
 
-        date_default_timezone_set('Europe/Paris');
+    $errors = $this->validateFormInputs($allPostVars);
 
-        function isEmail($email) {
-            return(preg_match("/^[-_.[:alnum:]]+@((([[:alnum:]]|[[:alnum:]][[:alnum:]-]*[[:alnum:]])\.)+(ad|ae|aero|af|ag|ai|al|am|an|ao|aq|ar|arpa|as|at|au|aw|az|ba|bb|bd|be|bf|bg|bh|bi|biz|bj|bm|bn|bo|br|bs|bt|bv|bw|by|bz|ca|cc|cd|cf|cg|ch|ci|ck|cl|cm|cn|co|com|coop|cr|cs|cu|cv|cx|cy|cz|de|dj|dk|dm|do|dz|ec|edu|ee|eg|eh|er|es|et|eu|fi|fj|fk|fm|fo|fr|ga|gb|gd|ge|gf|gh|gi|gl|gm|gn|gov|gp|gq|gr|gs|gt|gu|gw|gy|hk|hm|hn|hr|ht|hu|id|ie|il|in|info|int|io|iq|ir|is|it|jm|jo|jp|ke|kg|kh|ki|km|kn|kp|kr|kw|ky|kz|la|lb|lc|li|lk|lr|ls|lt|lu|lv|ly|ma|mc|md|mg|mh|mil|mk|ml|mm|mn|mo|mp|mq|mr|ms|mt|mu|museum|mv|mw|mx|my|mz|na|name|nc|ne|net|nf|ng|ni|nl|no|np|nr|nt|nu|nz|om|org|pa|pe|pf|pg|ph|pk|pl|pm|pn|pr|pro|ps|pt|pw|py|qa|re|ro|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sj|sk|sl|sm|sn|so|sr|st|su|sv|sy|sz|tc|td|tf|tg|th|tj|tk|tm|tn|to|tp|tr|tt|tv|tw|tz|ua|ug|uk|um|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|yu|za|zm|zw)$|(([0-9][0-9]?|[0-1][0-9][0-9]|[2][0-4][0-9]|[2][5][0-5])\.){3}([0-9][0-9]?|[0-1][0-9][0-9]|[2][0-4][0-9]|[2][5][0-5]))$/i", $email));
-        }
+    if (empty($errors)) {
+        $annonces = Annonce::where('id', $id)->with('annonceur')->get();
+        if (count($annonces) > 0) {
+            $annonce = $annonces[0];
+            $annonceur = $annonce->annonceur;
 
-        /*
-        * On récupère tous les champs du formulaire en supprimant
-        * les caractères invisibles en début et fin de chaîne.
-        */
-        $nom = trim($_POST['nom']);
-        $email = trim($_POST['email']);
-        $phone = trim($_POST['phone']);
-        $ville = trim($_POST['ville']);
-        $departement = trim($_POST['departement']);
-        $categorie = trim($_POST['categorie']);
-        $title = trim($_POST['title']);
-        $description = trim($_POST['description']);
-        $price = trim($_POST['price']);
-
-
-        // Tableau d'erreurs personnalisées
-        $errors = array();
-        $errors['nameAdvertiser'] = '';
-        $errors['emailAdvertiser'] = '';
-        $errors['phoneAdvertiser'] = '';
-        $errors['villeAdvertiser'] = '';
-        $errors['departmentAdvertiser'] = '';
-        $errors['categorieAdvertiser'] = '';
-        $errors['titleAdvertiser'] = '';
-        $errors['descriptionAdvertiser'] = '';
-        $errors['priceAdvertiser'] = '';
-
-
-        // On teste que les champs ne soient pas vides et soient de bons types
-        if(empty($nom)) {
-            $errors['nameAdvertiser'] = 'Veuillez entrer votre nom';
-        }
-        if(!isEmail($email)) {
-            $errors['emailAdvertiser'] = 'Veuillez entrer une adresse mail correcte';
-        }
-        if(empty($phone) && !is_numeric($phone) ) {
-            $errors['phoneAdvertiser'] = 'Veuillez entrer votre numéro de téléphone';
-        }
-        if(empty($ville)) {
-            $errors['villeAdvertiser'] = 'Veuillez entrer votre ville';
-        }
-        if(!is_numeric($departement)) {
-            $errors['departmentAdvertiser'] = 'Veuillez choisir un département';
-        }
-        if(!is_numeric($categorie)) {
-            $errors['categorieAdvertiser'] = 'Veuillez choisir une catégorie';
-        }
-        if(empty($title)) {
-            $errors['titleAdvertiser'] = 'Veuillez entrer un titre';
-        }
-        if(empty($description)) {
-            $errors['descriptionAdvertiser'] = 'Veuillez entrer une description';
-        }
-        if(empty($price) || !is_numeric($price)) {
-            $errors['priceAdvertiser'] = 'Veuillez entrer un prix';
-        }
-
-        // On vire les cases vides
-        $errors = array_values(array_filter($errors));
-
-        // S'il y a des erreurs on redirige vers la page d'erreur
-        if (!empty($errors)) {
-
-            $template = $twig->load("add-error.html.twig");
-            echo $template->render(array(
-                    "breadcrumb" => $menu,
-                    "chemin" => $chemin,
-                    "errors" => $errors)
-            );
-        }
-        // sinon on ajoute à la base et on redirige vers une page de succès
-        else{
-            $this->annonce = Annonce::find($id);
-            $idannonceur = $this->annonce->id_annonceur;
-            $this->annonceur = Annonceur::find($idannonceur);
-
-
-            $this->annonceur->email = htmlentities($allPostVars['email']);
-            $this->annonceur->nom_annonceur = htmlentities($allPostVars['nom']);
-            $this->annonceur->telephone = htmlentities($allPostVars['phone']);
-            $this->annonce->ville = htmlentities($allPostVars['ville']);
-            $this->annonce->id_departement = $allPostVars['departement'];
-            $this->annonce->prix = htmlentities($allPostVars['price']);
-            $this->annonce->mdp = password_hash ($allPostVars['psw'], PASSWORD_DEFAULT);
-            $this->annonce->titre = htmlentities($allPostVars['title']);
-            $this->annonce->description = htmlentities($allPostVars['description']);
-            $this->annonce->id_categorie = $allPostVars['categorie'];
-            $this->annonce->date = date('Y-m-d');
-            $this->annonceur->save();
-            $this->annonceur->annonce()->save($this->annonce);
-
+            $this->updateAnnonceurModel($annonceur, $allPostVars);
+            $this->updateAnnonceModel($annonce, $allPostVars);
 
             $template = $twig->load("modif-confirm.html.twig");
             echo $template->render(array("breadcrumb" => $menu, "chemin" => $chemin));
+        } else {
+            // Handle the case when the annonce is not found
         }
+    } else {
+        $template = $twig->load("add-error.html.twig");
+        echo $template->render(array(
+            "breadcrumb" => $menu,
+            "chemin" => $chemin,
+            "errors" => $errors
+        ));
     }
+}
+
+/**
+ * @param array $inputs
+ * @return array
+ */
+private function validateFormInputs(array $inputs): array
+{
+    $errors = [];
+    $this->validateInput('nameAdvertiser', $inputs['nom'], $errors, 'Veuillez entrer votre nom');
+    $errors = $this->validateEmailInput('emailAdvertiser', $inputs['email'], $errors, 'Veuillez entrer une adresse mail correcte');
+    $errors = $this->validatePhoneInput('phoneAdvertiser', $inputs['phone'], $errors, 'Veuillez entrer votre numéro de téléphone');
+    $this->validateInput('villeAdvertiser', $inputs['ville'], $errors, 'Veuillez entrer votre ville');
+    $this->validateInput('departmentAdvertiser', $inputs['departement'], $errors, 'Veuillez choisir un département');
+    $this->validateInput('categorieAdvertiser', $inputs['categorie'], $errors, 'Veuillez choisir une catégorie');
+    $this->validateInput('titleAdvertiser', $inputs['title'], $errors, 'Veuillez entrer un titre');
+    $this->validateInput('descriptionAdvertiser', $inputs['description'], $errors, 'Veuillez entrer une description');
+    $this->validatePriceInput('priceAdvertiser', $inputs['price'], $errors, 'Veuillez entrer un prix');
+
+    return $errors;
+}
+
+/**
+ * @param string $key
+ * @param string $value
+ * @param array $errors
+ * @param string $message
+ */
+private function validateInput(string $key, string $value, array &$errors, string $message): void
+{
+    if (empty($value)) {
+        $errors[$key] = $message;
+    }
+}
+
+private function validateEmailInput(string $key, string $value, array &$errors, string $message): array
+{
+    if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
+        $errors[$key] = $message;
+    }
+    return $errors;
+}
+
+private function validatePhoneInput(string $key, string $value, array &$errors, string $message): array
+{
+    if (!empty($value) && !ctype_digit($value)) {
+        $errors[$key] = $message;
+    }
+    return $errors;
+}
+
+private function validatePriceInput(string $key, string $value, array &$errors, string $message): array
+{
+    if (!empty($value) && !is_numeric($value)) {
+        $errors[$key] = $message;
+    }
+    return $errors;
+}
+
+/**
+ * @param Annonceur $annonceur
+ * @param array $inputs
+ */
+private function updateAnnonceurModel(Annonceur $annonceur, array $inputs): void
+{
+    $annonceur->email = htmlentities($inputs['email']);
+    $annonceur->nom_annonceur = htmlentities($inputs['nom']);
+    $annonceur->telephone = htmlentities($inputs['phone']);
+    $annonceur->save();
+}
+
+/**
+ * @param Annonce $annonce
+ * @param array $inputs
+ */
+private function updateAnnonceModel(Annonce $annonce, array $inputs): void
+{
+    $annonce->ville = htmlentities($inputs['ville']);
+    $annonce->id_departement = $inputs['departement'];
+    $annonce->prix = htmlentities($inputs['price']);
+    $annonce->mdp = password_hash($inputs['psw'], PASSWORD_DEFAULT);
+    $annonce->titre = htmlentities($inputs['title']);
+    $annonce->description = htmlentities($inputs['description']);
+    $annonce->id_categorie = $inputs['categorie'];
+    $annonce->date = date('Y-m-d');
+    $annonce->save();
+}
 }
