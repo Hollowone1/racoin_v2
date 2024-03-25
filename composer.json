@@ -18,5 +18,8 @@
         "allow-plugins": {
             "kylekatarnls/update-helper": true
         }
+    },
+    "require-dev": {
+        "rector/rector": "*"
     }
 }
