@@ -1,79 +1,86 @@
 <?php
 
-namespace App\controllers\getSearch;
+namespace App\Controllers\GetSearch;
 
-use app\models\Annonce;
-use app\models\Categorie;
+use App\Models\Annonce;
+use App\Models\Categorie;
 
-class Search {
-
-    function show($twig, $menu, $chemin, $cat) {
+class Search
+{
+    public function show($twig, array $menu, string $chemin, array $cat): void
+    {
         $template = $twig->load("search.html.twig");
-        $menu = array(
-            array('href' => $chemin,
-                'text' => 'Acceuil'),
-            array('href' => $chemin."/search",
-                'text' => "Recherche")
-        );
-        echo $template->render(array("breadcrumb" => $menu, "chemin" => $chemin, "categories" => $cat));
+
+        echo $template->render([
+            "breadcrumb" => $menu,
+            "chemin"     => $chemin,
+            "categories" => $cat
+        ]);
     }
 
-    function research($array, $twig, $menu, $chemin, $cat) {
+    public function research(array $searchData, $twig, array $menu, string $chemin, array $cat): void
+    {
         $template = $twig->load("index.html.twig");
-        $menu = array(
-            array('href' => $chemin,
-                'text' => 'Acceuil'),
-            array('href' => $chemin."/search",
-                'text' => "Résultats de la recherche")
-        );
 
-        $nospace_mc = str_replace(' ', '', $array['motclef']);
-        $nospace_cp = str_replace(' ', '', $array['codepostal']);
-
+        $cleanedSearchData = array_map(function ($value) {
+            return trim($value);
+        }, $searchData);
 
         $query = Annonce::select();
 
-        if( ($nospace_mc === "") &&
-            ($nospace_cp === "") &&
-            (($array['categorie'] === "Toutes catégories" || $array['categorie'] === "-----")) &&
-            ($array['prix-min'] === "Min") &&
-            ( ($array['prix-max'] === "Max") || ($array['prix-max'] === "nolimit") ) ) {
-            $annonce = Annonce::all();
+        // Applies filters based on the provided search data
+        $this->applyFilters($query, $cleanedSearchData);
 
-        } else {
-            // A REFAIRE SEPARER LES TRUCS
-            if( ($nospace_mc !== "") ) {
-                $query->where('description', 'like', '%'.$array['motclef'].'%');
-            }
+        $annonces = $query->get();
 
-            if( ($nospace_cp !== "") ) {
-                $query->where('ville', '=', $array['codepostal']);
-            }
-
-            if ( ($array['categorie'] !== "Toutes catégories" && $array['categorie'] !== "-----") ) {
-                $categ = Categorie::select('id_categorie')->where('id_categorie', '=', $array['categorie'])->first()->id_categorie;
-                $query->where('id_categorie', '=', $categ);
-            }
-
-            if ( $array['prix-min'] !== "Min" && $array['prix-max'] !== "Max") {
-                if($array['prix-max'] !== "nolimit") {
-                    $query->whereBetween('prix', array($array['prix-min'], $array['prix-max']));
-                } else {
-                    $query->where('prix', '>=', $array['prix-min']);
-                }
-            } elseif ( $array['prix-max'] !== "Max" && $array['prix-max'] !== "nolimit") {
-                $query->where('prix', '<=', $array['prix-max']);
-            } elseif ( $array['prix-min'] !== "Min" ) {
-                $query->where('prix', '>=', $array['prix-min']);
-            }
-
-            $annonce = $query->get();
-        }
-
-        echo $template->render(array("breadcrumb" => $menu, "chemin" => $chemin, "annonces" => $annonce, "categories" => $cat));
-
+        echo $template->render([
+            "breadcrumb" => $menu,
+            "chemin"     => $chemin,
+            "annonces"   => $annonces,
+            "categories" => $cat
+        ]);
     }
 
-}
+    /**
+     * Applies filters and conditions based on the search data
+     */
+    private function applyFilters(
+        \Illuminate\Database\Eloquent\Builder $query,
+        array $searchData
+    ): void {
+        foreach ($searchData as $key => $value) {
+            switch ($key) {
+                case 'motclef':
+                    if (!empty($value)) {
+                        $query->where('description', 'like', "%{$value}%");
+                    }
+                    break;
 
-?>
+                case 'codepostal':
+                    if (!empty($value)) {
+                        $query->where('ville', '=', $value);
+                    }
+                    break;
+
+                case 'categorie':
+                    if ($value !== 'Toutes catégories' && $value !== '-----') {
+                        $categorie = Categorie::select('id_categorie')->where('id_categorie', '=', $value)->first();
+                        $query->where('id_categorie', '=', $categorie->id_categorie);
+                    }
+                    break;
+
+                case 'prix-min':
+                    if ($value !== 'Min') {
+                        $query->where('prix', '>=', $value);
+                    }
+                    break;
+
+                case 'prix-max':
+                    if ($value !== 'Max' && $value !== 'nolimit') {
+                        $query->where('prix', '<=', $value);
+                    }
+                    break;
+            }
+        }
+    }
+}

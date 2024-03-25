@@ -1,52 +1,55 @@
 <?php
 
-namespace App\controllers\getAllAnounce;
+namespace App\Controllers\GetAllAnounce;
 
-use app\models\Annonce;
-use app\models\Photo;
-use app\models\Annonceur;
+use App\Models\Annonce;
+use App\Models\Annonceur;
+use App\Models\Photo;
+use Twig\Environment;
 
-class index
+class Index
 {
-    protected $annonce = array();
+    protected $annonce = [];
 
-    public function displayAllAnnonce($twig, $menu, $chemin, $cat)
+    public function displayAllAnnonce(Environment $twig, array $menu, string $chemin, array $cat): void
     {
-        $template = $twig->load("index.html.twig");
-        $menu     = array(
-            array(
-                'href' => $chemin,
-                'text' => 'Acceuil'
-            ),
-        );
-
         $this->getAll($chemin);
-        echo $template->render(array(
+
+        $template = $twig->load("index.html.twig");
+
+        echo $template->render([
             "breadcrumb" => $menu,
             "chemin"     => $chemin,
             "categories" => $cat,
             "annonces"   => $this->annonce
-        ));
+        ]);
     }
 
-    public function getAll($chemin)
+    public function getAll(string $chemin): void
     {
-        $tmp     = Annonce::with("Annonceur")->orderBy('id_annonce', 'desc')->take(12)->get();
-        $annonce = [];
-        foreach ($tmp as $t) {
-            $t->nb_photo = Photo::where("id_annonce", "=", $t->id_annonce)->count();
-            if ($t->nb_photo > 0) {
-                $t->url_photo = Photo::select("url_photo")
-                    ->where("id_annonce", "=", $t->id_annonce)
-                    ->first()->url_photo;
-            } else {
-                $t->url_photo = '/img/noimg.png';
-            }
-            $t->nom_annonceur = Annonceur::select("nom_annonceur")
-                ->where("id_annonceur", "=", $t->id_annonceur)
-                ->first()->nom_annonceur;
-            array_push($annonce, $t);
-        }
-        $this->annonce = $annonce;
+        $annotatedAnnonces = Annonce::with("Annonceur")
+            ->orderBy('id_annonce', 'desc')
+            ->take(12)
+            ->get()
+            ->map(function (Annonce $annonce) use ($chemin) {
+                $annonce->nb_photo = Photo::where("id_annonce", "=", $annonce->id_annonce)->count();
+
+                if ($annonce->nb_photo > 0) {
+                    $annonce->url_photo = Photo::select("url_photo")
+                        ->where("id_annonce", "=", $annonce->id_annonce)
+                        ->first()->url_photo;
+                } else {
+                    $annonce->url_photo = '/img/noimg.png';
+                }
+
+                $annonce->nom_annonceur = Annonceur::select("nom_annonceur")
+                    ->where("id_annonceur", "=", $annonce->id_annonceur)
+                    ->first()->nom_annonceur;
+
+                return $annonce;
+            })
+        ;
+
+        $this->annonce = $annotatedAnnonces->toArray();
     }
 }

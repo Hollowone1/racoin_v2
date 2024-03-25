@@ -1,54 +1,64 @@
 <?php
 
-namespace App\controllers\getCategorie;
+namespace App\Controllers\GetCategorie;
 
-use app\models\Categorie;
-use app\models\Annonce;
-use app\models\Photo;
-use app\models\Annonceur;
+use App\Models\Annonce;
+use App\Models\Annonceur;
+use App\Models\Categorie;
+use App\Models\Photo;
 
-class getCategorie {
+class GetCategorie
+{
+    protected $annonce = [];
 
-    protected $categories = array();
-
-    public function getCategories() {
+    public function getCategories(): array
+    {
         return Categorie::orderBy('nom_categorie')->get()->toArray();
     }
 
-    public function getCategorieContent($chemin, $n) {
-        $tmp = Annonce::with("Annonceur")->orderBy('id_annonce','desc')->where('id_categorie', "=", $n)->get();
-        $annonce = [];
-        foreach($tmp as $t) {
-            $t->nb_photo = Photo::where("id_annonce", "=", $t->id_annonce)->count();
-            if($t->nb_photo > 0){
-                $t->url_photo = Photo::select("url_photo")
-                    ->where("id_annonce", "=", $t->id_annonce)
+    public function getCategorieContent(string $chemin, int $categorieId): void
+    {
+        $annonceCollection = Annonce::with("Annonceur")
+            ->orderBy('id_annonce', 'desc')
+            ->where('id_categorie', '=', $categorieId)
+            ->get()
+        ;
+
+        $this->annonce = $annonceCollection->map(function (Annonce $annonce) use ($chemin) {
+            $annonce->nb_photo = Photo::where("id_annonce", "=", $annonce->id_annonce)->count();
+
+            if ($annonce->nb_photo > 0) {
+                $annonce->url_photo = Photo::select("url_photo")
+                    ->where("id_annonce", "=", $annonce->id_annonce)
                     ->first()->url_photo;
-            }else{
-                $t->url_photo = $chemin.'/img/noimg.png';
+            } else {
+                $annonce->url_photo = $chemin . '/img/noimg.png';
             }
-            $t->nom_annonceur = Annonceur::select("nom_annonceur")
-                ->where("id_annonceur", "=", $t->id_annonceur)
+
+            $annonce->nom_annonceur = Annonceur::select("nom_annonceur")
+                ->where("id_annonceur", "=", $annonce->id_annonceur)
                 ->first()->nom_annonceur;
-            array_push($annonce, $t);
-        }
-        $this->annonce = $annonce;
+
+            return $annonce;
+        })->toArray();
     }
 
-    public function displayCategorie($twig, $menu, $chemin, $cat, $n) {
-        $template = $twig->load("index.html.twig");
+    public function displayCategorie($twig, array $menu, string $chemin, array $cat, int $categorieId, string $categorieName): void
+    {
         $menu = array(
-            array('href' => $chemin,
-                'text' => 'Acceuil'),
-            array('href' => $chemin."/cat/".$n,
-                'text' => Categorie::find($n)->nom_categorie)
+            array('href' => $chemin, 'text' => 'Acceuil'),
+            array('href' => $chemin . "/cat/{$categorieId}", 'text' => $categorieName)
         );
 
-        $this->getCategorieContent($chemin, $n);
-        echo $template->render(array(
+        $this->getCategorieContent($chemin, $categorieId);
+
+        $template = $twig->load("index.html.twig");
+
+        echo $template->render([
             "breadcrumb" => $menu,
-            "chemin" => $chemin,
+            "chemin"     => $chemin,
             "categories" => $cat,
-            "annonces" => $this->annonce));
+            "annonces"   => $this->annonce
+        ]);
     }
 }
