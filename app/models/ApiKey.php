@@ -1,6 +1,6 @@
 <?php
 
-namespace model;
+namespace app\models\ApiKey;
 
 class ApiKey extends \Illuminate\Database\Eloquent\Model {
     protected $table = 'apikey';

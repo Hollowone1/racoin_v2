@@ -1,6 +1,6 @@
 <?php
 
-namespace model;
+namespace app\models\Photo;
 
 class Photo extends \Illuminate\Database\Eloquent\Model {
     protected $table = 'photo';

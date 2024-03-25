@@ -1,6 +1,6 @@
 <?php
 
-namespace model;
+namespace app\models\SousCategorie;
 
 class SousCategorie extends \Illuminate\Database\Eloquent\Model {
     protected $table = 'sous_categorie';
