@@ -1,6 +1,6 @@
 <?php
 
-namespace controller;
+namespace App\controllers\getCategorie;
 
 use model\Categorie;
 use model\Annonce;

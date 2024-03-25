@@ -1,6 +1,6 @@
 <?php
 
-namespace controller;
+namespace App\controllers\getApiKey;
 
 use model\ApiKey;
 

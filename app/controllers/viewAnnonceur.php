@@ -6,7 +6,8 @@
  * Time: 00:25
  */
 
-namespace controller;
+namespace App\controllers\viewAnnonceur;
+
 use model\Annonce;
 use model\Annonceur;
 use model\Photo;

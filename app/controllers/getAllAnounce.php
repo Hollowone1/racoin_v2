@@ -1,6 +1,6 @@
 <?php
 
-namespace controller;
+namespace App\controllers\getAllAnounce;
 
 use model\Annonce;
 use model\Photo;

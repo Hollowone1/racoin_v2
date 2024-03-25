@@ -1,6 +1,6 @@
 <?php
 
-namespace controller;
+namespace App\controllers\getDepartment;
 
 use model\Departement;
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace controller;
+namespace App\controllers\getSearch;
 
 use model\Annonce;
 use model\Categorie;

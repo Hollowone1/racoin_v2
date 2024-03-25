@@ -1,6 +1,7 @@
 <?php
 
-namespace controller;
+namespace App\controllers\createItem;
+
 use AllowDynamicProperties;
 use model\Annonce;
 use model\Annonceur;

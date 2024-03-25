@@ -1,6 +1,6 @@
 <?php
 
-namespace controller;
+namespace App\controllers\addAnnounce;
 
 use model\Annonce;
 use model\Annonceur;
